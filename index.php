@@ -105,7 +105,7 @@ $conn->close();
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -115,38 +115,28 @@ $conn->close();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            background-color: #f4f6f9;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .custom-input {
-            background-color: #eef2f7;
-            border: none;
             border-radius: 8px;
             padding: 10px 15px;
         }
 
         .form-label {
             font-size: 0.9rem;
-            color: #555;
             margin-bottom: 0.2rem;
         }
 
         .btn-submit {
-            border: 1px solid #ccc;
             border-radius: 20px;
             padding: 8px 40px;
             background: transparent;
             font-weight: 500;
         }
 
-        .btn-submit:hover {
-            background-color: #e2e6ea;
-        }
-
         .table-custom th {
-            border-bottom: 2px solid #dee2e6;
-            color: #555;
+            border-bottom: 2px solid currentColor;
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -154,7 +144,6 @@ $conn->close();
         .table-custom td {
             vertical-align: middle;
             font-size: 0.9rem;
-            color: #444;
         }
 
         .action-btn {

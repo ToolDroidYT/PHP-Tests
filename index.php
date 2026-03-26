@@ -1,22 +1,21 @@
 <?php
 
-$db_config = [
-    'host' => '127.0.0.1',
-    'user' => 'root',
-    'pass' => '',
-    'db' => 'LabExamDB'
-];
+// database
+$host = '127.0.0.1';
+$username = 'root';
+$password = '';
+$databaseName = 'LabExamDB';
 
-$conn = new mysqli($db_config['host'], $db_config['user'], $db_config['pass']);
+$conn = new mysqli($host, $username, $password);
 
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die('Connection failed: ' . $conn->connect_error);
 }
 
-$conn->query("CREATE DATABASE IF NOT EXISTS " . $db_config['db']);
-$conn->select_db($db_config['db']);
+$conn->query("CREATE DATABASE IF NOT EXISTS $databaseName");
+$conn->select_db($databaseName);
 
-$table_query = "CREATE TABLE IF NOT EXISTS Users (
+$createTableSQL = "CREATE TABLE IF NOT EXISTS Users (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     FirstName VARCHAR(50) NOT NULL,
     LastName VARCHAR(50) NOT NULL,
@@ -25,67 +24,87 @@ $table_query = "CREATE TABLE IF NOT EXISTS Users (
     Email VARCHAR(100) NOT NULL,
     PhoneNumber VARCHAR(20) NOT NULL
 )";
-$conn->query($table_query);
+$conn->query($createTableSQL);
 
-// Delete Logic
+$allowedGender = ['Male', 'Female'];
+$allowedCourse = ['BSIT', 'BSCS'];
+
+// Delete record
 if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
-    $stmt = $conn->prepare("DELETE FROM Users WHERE ID = ?");
+    $deleteID = (int) $_GET['delete'];
+
+    $deleteSQL = "DELETE FROM Users WHERE ID = ?";
+    $stmt = $conn->prepare($deleteSQL);
+
     if ($stmt) {
-        $stmt->bind_param("i", $_GET['delete']);
+        $stmt->bind_param('i', $deleteID);
         $stmt->execute();
         $stmt->close();
-        header("Location: index.php");
+    }
+
+    header('Location: index.php');
+    exit;
+}
+
+// Add or update record
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $firstName = trim($_POST['first_name'] ?? '');
+    $lastName = trim($_POST['last_name'] ?? '');
+    $gender = $_POST['gender'] ?? '';
+    $course = $_POST['course'] ?? '';
+    $email = trim($_POST['email'] ?? '');
+    $phoneNumber = trim($_POST['phone_number'] ?? '');
+
+    $isValid = $firstName !== ''
+        && $lastName !== ''
+        && in_array($gender, $allowedGender, true)
+        && in_array($course, $allowedCourse, true)
+        && $email !== ''
+        && $phoneNumber !== '';
+
+    if ($isValid && isset($_POST['submit'])) {
+        $insertSQL = "INSERT INTO Users (FirstName, LastName, Gender, Course, Email, PhoneNumber)
+                      VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($insertSQL);
+
+        if ($stmt) {
+            $stmt->bind_param('ssssss', $firstName, $lastName, $gender, $course, $email, $phoneNumber);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        header('Location: index.php');
+        exit;
+    }
+
+    if ($isValid && isset($_POST['update']) && isset($_POST['id']) && is_numeric($_POST['id'])) {
+        $updateID = (int) $_POST['id'];
+
+        $updateSQL = "UPDATE Users
+                      SET FirstName = ?, LastName = ?, Gender = ?, Course = ?, Email = ?, PhoneNumber = ?
+                      WHERE ID = ?";
+        $stmt = $conn->prepare($updateSQL);
+
+        if ($stmt) {
+            $stmt->bind_param('ssssssi', $firstName, $lastName, $gender, $course, $email, $phoneNumber, $updateID);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        header('Location: index.php');
         exit;
     }
 }
 
-// Update Logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update'])) {
-    $stmt = $conn->prepare("UPDATE Users SET FirstName=?, LastName=?, Gender=?, Course=?, Email=?, PhoneNumber=? WHERE ID=?");
-    if ($stmt) {
-        $stmt->bind_param(
-            "ssssssi",
-            $_POST['first_name'],
-            $_POST['last_name'],
-            $_POST['gender'],
-            $_POST['course'],
-            $_POST['email'],
-            $_POST['phone_number'],
-            $_POST['id']
-        );
-        $stmt->execute();
-        $stmt->close();
-        header("Location: index.php");
-        exit;
-    }
-}
-
-// Insert Logic
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
-    $stmt = $conn->prepare("INSERT INTO Users (FirstName, LastName, Gender, Course, Email, PhoneNumber) VALUES (?, ?, ?, ?, ?, ?)");
-    if ($stmt) {
-        $stmt->bind_param(
-            "ssssss",
-            $_POST['first_name'],
-            $_POST['last_name'],
-            $_POST['gender'],
-            $_POST['course'],
-            $_POST['email'],
-            $_POST['phone_number']
-        );
-        $stmt->execute();
-        $stmt->close();
-        header("Location: index.php");
-        exit;
-    }
-}
-
-// Fetch User for Editing (if requested)
+// Get user to edit
 $editUser = null;
 if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
-    $stmt = $conn->prepare("SELECT * FROM Users WHERE ID = ?");
+    $editID = (int) $_GET['edit'];
+    $editSQL = "SELECT * FROM Users WHERE ID = ?";
+
+    $stmt = $conn->prepare($editSQL);
     if ($stmt) {
-        $stmt->bind_param("i", $_GET['edit']);
+        $stmt->bind_param('i', $editID);
         $stmt->execute();
         $result = $stmt->get_result();
         $editUser = $result->fetch_assoc();
@@ -93,10 +112,10 @@ if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
     }
 }
 
-// Fetch All Users for Table
+// Get all users for display
 $users = [];
-$query = "SELECT ID, FirstName, LastName, Gender, Email, Course, PhoneNumber FROM Users";
-$result = $conn->query($query);
+$allUsersSQL = "SELECT ID, FirstName, LastName, Gender, Email, Course, PhoneNumber FROM Users ORDER BY ID DESC";
+$result = $conn->query($allUsersSQL);
 if ($result) {
     $users = $result->fetch_all(MYSQLI_ASSOC);
 }
@@ -265,7 +284,7 @@ $conn->close();
                                             <a href="index.php?edit=<?= $user['ID'] ?>" class="action-btn btn-edit text-decoration-none">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
-                                            <a href="index.php?delete=<?= $user['ID'] ?>" onclick="return confirm('Art thou certain thou wishest to strike this record?');" class="action-btn btn-delete text-decoration-none">
+                                            <a href="index.php?delete=<?= $user['ID'] ?>" onclick="return confirm('Are you sure you want to delete this record?');" class="action-btn btn-delete text-decoration-none">
                                                 <i class="bi bi-trash"></i>
                                             </a>
                                         </td>

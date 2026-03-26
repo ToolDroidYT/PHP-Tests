@@ -134,51 +134,7 @@ $conn->close();
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .custom-input {
-            border-radius: 8px;
-            padding: 10px 15px;
-        }
-
-        .form-label {
-            font-size: 0.9rem;
-            margin-bottom: 0.2rem;
-        }
-
-        .btn-submit {
-            border-radius: 20px;
-            padding: 8px 40px;
-            background: transparent;
-            font-weight: 500;
-        }
-
-        .table-custom th {
-            border-bottom: 2px solid currentColor;
-            font-weight: 600;
-            font-size: 0.9rem;
-        }
-
-        .table-custom td {
-            vertical-align: middle;
-            font-size: 0.9rem;
-        }
-
-        .action-btn {
-            border: none;
-            border-radius: 4px;
-            padding: 4px 8px;
-            color: white;
-            font-size: 0.85rem;
-        }
-
-        .btn-edit {
-            background-color: #f1c40f;
-        }
-
-        .btn-delete {
-            background-color: #e74c3c;
+            font-family: Arial, Helvetica, sans-serif;
         }
     </style>
 </head>
@@ -199,12 +155,12 @@ $conn->close();
 
                     <div class="mb-3">
                         <label class="form-label">First Name</label>
-                        <input type="text" name="first_name" class="form-control custom-input" value="<?= $editUser ? htmlspecialchars($editUser['FirstName']) : '' ?>" required>
+                        <input type="text" name="first_name" class="form-control" value="<?= $editUser ? htmlspecialchars($editUser['FirstName']) : '' ?>" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Last Name</label>
-                        <input type="text" name="last_name" class="form-control custom-input" value="<?= $editUser ? htmlspecialchars($editUser['LastName']) : '' ?>" required>
+                        <input type="text" name="last_name" class="form-control" value="<?= $editUser ? htmlspecialchars($editUser['LastName']) : '' ?>" required>
                     </div>
 
                     <div class="mb-3">
@@ -221,7 +177,7 @@ $conn->close();
 
                     <div class="mb-3">
                         <label class="form-label">Course</label>
-                        <select name="course" class="form-select custom-input" required>
+                        <select name="course" class="form-select" required>
                             <option value="" <?= !$editUser ? 'selected disabled' : '' ?>></option>
                             <option value="BSIT" <?= ($editUser && $editUser['Course'] === 'BSIT') ? 'selected' : '' ?>>BSIT</option>
                             <option value="BSCS" <?= ($editUser && $editUser['Course'] === 'BSCS') ? 'selected' : '' ?>>BSCS</option>
@@ -230,20 +186,20 @@ $conn->close();
 
                     <div class="mb-3">
                         <label class="form-label">Email</label>
-                        <input type="email" name="email" class="form-control custom-input" value="<?= $editUser ? htmlspecialchars($editUser['Email']) : '' ?>" required>
+                        <input type="email" name="email" class="form-control" value="<?= $editUser ? htmlspecialchars($editUser['Email']) : '' ?>" required>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label">Phone Number</label>
-                        <input type="tel" name="phone_number" class="form-control custom-input" value="<?= $editUser ? htmlspecialchars($editUser['PhoneNumber']) : '' ?>" required>
+                        <input type="tel" name="phone_number" class="form-control" value="<?= $editUser ? htmlspecialchars($editUser['PhoneNumber']) : '' ?>" required>
                     </div>
 
                     <div class="text-center">
                         <?php if ($editUser): ?>
                             <a href="index.php" class="btn btn-secondary rounded-pill px-4 me-2">Cancel</a>
-                            <button type="submit" name="update" class="btn btn-submit">Update</button>
+                            <button type="submit" name="update" class="btn btn-primary">Update</button>
                         <?php else: ?>
-                            <button type="submit" name="submit" class="btn btn-submit">Submit</button>
+                            <button type="submit" name="submit" class="btn btn-primary">Submit</button>
                         <?php endif; ?>
                     </div>
                 </form>
@@ -252,7 +208,7 @@ $conn->close();
             <div class="col-md-8 ps-md-4 mt-5 mt-md-0">
                 <h4 class="text-center mb-4 text-secondary fw-bold">Information</h4>
                 <div class="table-responsive">
-                    <table class="table table-borderless table-custom table-hover">
+                    <table class="table table-hover">
                         <thead>
                             <tr>
                                 <th>ID</th>
@@ -281,10 +237,10 @@ $conn->close();
                                         <td><?= htmlspecialchars($user['Course'] ?? '') ?></td>
                                         <td><?= htmlspecialchars($user['PhoneNumber'] ?? '') ?></td>
                                         <td>
-                                            <a href="index.php?edit=<?= $user['ID'] ?>" class="action-btn btn-edit text-decoration-none">
+                                            <a href="index.php?edit=<?= $user['ID'] ?>" class="btn btn-warning btn-sm">
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
-                                            <a href="index.php?delete=<?= $user['ID'] ?>" onclick="return confirm('Are you sure you want to delete this record?');" class="action-btn btn-delete text-decoration-none">
+                                            <a href="index.php?delete=<?= $user['ID'] ?>" onclick="return confirm('Are you sure you want to delete this record?');" class="btn btn-danger btn-sm">
                                                 <i class="bi bi-trash"></i>
                                             </a>
                                         </td>
